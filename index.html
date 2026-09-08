@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBS UAT Matrix</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' font-size='80'%3E%3Ctext y='.9em'%3E%F0%9F%93%8B%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root {
+    --ground: #edf1ef;
+    --surface: #ffffff;
+    --surface-raised: #f5f8f6;
+    --ink: #1b222c;
+    --ink-soft: #545f6e;
+    --ink-faint: #7c8896;
+    --line: #d7dcda;
+    --line-soft: #e6eae7;
+    --accent: #2b5c7a;
+    --accent-soft: #dbe8ee;
+    --accent-soft-line: #b9d2dd;
+    --warm: #b5502a;
+    --pass: #2f8f5b;
+    --pass-soft: #e3f3ea;
+    --pass-line: #b7dcc6;
+    --fail: #c43d3d;
+    --fail-soft: #fbe8e7;
+    --fail-line: #eebdbc;
+    --partial: #a8730e;
+    --partial-soft: #faf0d9;
+    --partial-line: #eeceab;
+    --notrun: #6f7a88;
+    --notrun-soft: #eceff1;
+    --notrun-line: #d3d9dd;
+    --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --radius: 10px;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #12161b; --surface: #1a2027; --surface-raised: #212832;
+      --ink: #e8ecef; --ink-soft: #a3adb9; --ink-faint: #78828e;
+      --line: #313a45; --line-soft: #262e37;
+      --accent: #7fb2cf; --accent-soft: #1f333f; --accent-soft-line: #305064;
+      --warm: #e0956c;
+      --pass: #6fcf9c; --pass-soft: #16281f; --pass-line: #2c5b3f;
+      --fail: #ea8b8b; --fail-soft: #2c1a1a; --fail-line: #6b3535;
+      --partial: #e0b667; --partial-soft: #2c2312; --partial-line: #6b5325;
+      --notrun: #9aa5b1; --notrun-soft: #232830; --notrun-line: #3a424c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #12161b; --surface: #1a2027; --surface-raised: #212832;
+    --ink: #e8ecef; --ink-soft: #a3adb9; --ink-faint: #78828e;
+    --line: #313a45; --line-soft: #262e37;
+    --accent: #7fb2cf; --accent-soft: #1f333f; --accent-soft-line: #305064;
+    --warm: #e0956c;
+    --pass: #6fcf9c; --pass-soft: #16281f; --pass-line: #2c5b3f;
+    --fail: #ea8b8b; --fail-soft: #2c1a1a; --fail-line: #6b3535;
+    --partial: #e0b667; --partial-soft: #2c2312; --partial-line: #6b5325;
+    --notrun: #9aa5b1; --notrun-soft: #232830; --notrun-line: #3a424c;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--ground); color: var(--ink); font-family: var(--font-body);
+    font-size: 14.5px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  ::selection { background: var(--accent-soft); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  .masthead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+  .masthead .eyebrow { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 3.6vw, 34px); letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; color: var(--ink); }
+  .masthead p { margin: 0; color: var(--ink-soft); max-width: 56ch; }
+  .masthead .meta { text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); }
+  .masthead .meta strong { color: var(--ink-soft); font-weight: 500; }
+
+  .dashboard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 22px; align-items: center; }
+  .stat { display: flex; flex-direction: column; gap: 2px; min-width: 64px; }
+  .stat .n { font-family: var(--font-display); font-weight: 800; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .stat .l { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-faint); }
+  .stat.pass .n { color: var(--pass); } .stat.fail .n { color: var(--fail); }
+  .stat.partial .n { color: var(--partial); } .stat.notrun .n { color: var(--ink-faint); }
+  .dashboard .bar-col { flex: 1 1 220px; min-width: 200px; }
+  .progress-track { height: 9px; border-radius: 5px; background: var(--notrun-soft); overflow: hidden; display: flex; border: 1px solid var(--line-soft); }
+  .progress-track span { display: block; height: 100%; }
+  .progress-track .seg-pass { background: var(--pass); }
+  .progress-track .seg-fail { background: var(--fail); }
+  .progress-track .seg-partial { background: var(--partial); }
+  .progress-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11.5px; color: var(--ink-faint); font-family: var(--font-mono); }
+  .sync-pill { font-family: var(--font-mono); font-size: 11px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-faint); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .sync-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--notrun); }
+  .sync-pill.live .dot { background: var(--pass); }
+  .sync-pill.local .dot { background: var(--partial); }
+  .sync-pill.error .dot { background: var(--fail); }
+
+  .toolbar { position: sticky; top: 0; z-index: 5; background: var(--ground); display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 0; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .toolbar input[type="search"], .toolbar select { font-family: var(--font-body); font-size: 13px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  .toolbar input[type="search"] { flex: 1 1 220px; min-width: 160px; }
+  .toolbar select { min-width: 150px; }
+  .toolbar input:focus-visible, .toolbar select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .toolbar .count { align-self: center; font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+  .toolbar .reset { align-self: center; font-size: 12.5px; text-decoration: none; border-bottom: 1px dotted var(--accent); cursor: pointer; color: var(--accent); }
+
+  .group { margin-top: 30px; }
+  .group-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; padding-left: 12px; border-left: 3px solid var(--accent); }
+  .group-head .idx { font-family: var(--font-mono); font-size: 12px; color: var(--accent); font-weight: 500; }
+  .group-head h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .group-head .gcount { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  thead th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-faint); font-weight: 600; padding: 9px 14px; background: var(--surface-raised); border-bottom: 1px solid var(--line); }
+  tbody tr { border-bottom: 1px solid var(--line-soft); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-raised); }
+  td { padding: 11px 14px; vertical-align: top; }
+  td.id-cell { font-family: var(--font-mono); font-size: 12px; color: var(--accent); white-space: nowrap; font-weight: 500; padding-top: 13px; }
+  td.text-cell { color: var(--ink); max-width: 480px; }
+  td.text-cell .req { display: inline-block; margin-left: 6px; font-size: 10px; font-family: var(--font-mono); color: var(--warm); border: 1px solid var(--warm); border-radius: 4px; padding: 0 4px; vertical-align: 1px; }
+  td.result-cell { min-width: 150px; }
+  td.remarks-cell { min-width: 220px; }
+
+  select.status-select {
+    width: 100%; font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; padding: 7px 26px 7px 10px;
+    border-radius: 7px; border: 1px solid var(--line); cursor: pointer; appearance: none;
+    background-repeat: no-repeat; background-position: right 8px center; background-size: 11px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23545f6e'%3E%3Cpath d='M5.5 7.5l4.5 5 4.5-5z'/%3E%3C/svg%3E");
+    color: var(--ink-soft); background-color: var(--notrun-soft); border-color: var(--notrun-line);
+  }
+  select.status-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  select.status-select.st-pass { background-color: var(--pass-soft); border-color: var(--pass-line); color: var(--pass); }
+  select.status-select.st-fail { background-color: var(--fail-soft); border-color: var(--fail-line); color: var(--fail); }
+  select.status-select.st-partial { background-color: var(--partial-soft); border-color: var(--partial-line); color: var(--partial); }
+
+  input.remarks-input { width: 100%; font-family: var(--font-body); font-size: 13px; padding: 7px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  input.remarks-input::placeholder { color: var(--ink-faint); }
+  input.remarks-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input.remarks-input.saved-flash { border-color: var(--pass-line); }
+
+  .hidden-row { display: none; }
+
+  footer { margin-top: 46px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  footer .fmono { font-family: var(--font-mono); }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 20px 14px 60px; }
+    .masthead { flex-direction: column; align-items: flex-start; }
+    .masthead .meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">User Acceptance Test Script</p>
+      <h1>IBS Business Management System</h1>
+      <p>End-to-end UAT matrix covering every functional area — from login through multi-branch settlement. Set a result and a remark per test case; the sheet saves and syncs live to everyone with this link.</p>
+    </div>
+    <div class="meta">
+      <div><strong id="metaCases">—</strong> test cases</div>
+      <div><strong id="metaGroups">—</strong> functional areas</div>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <div class="stat"><span class="n" id="statTotal">0</span><span class="l">Total</span></div>
+    <div class="stat pass"><span class="n" id="statPass">0</span><span class="l">Pass</span></div>
+    <div class="stat fail"><span class="n" id="statFail">0</span><span class="l">Fail</span></div>
+    <div class="stat partial"><span class="n" id="statPartial">0</span><span class="l">Partial</span></div>
+    <div class="stat notrun"><span class="n" id="statNotRun">0</span><span class="l">Not run</span></div>
+    <div class="bar-col">
+      <div class="progress-track">
+        <span class="seg-pass" id="segPass" style="width:0%"></span>
+        <span class="seg-partial" id="segPartial" style="width:0%"></span>
+        <span class="seg-fail" id="segFail" style="width:0%"></span>
+      </div>
+      <div class="progress-label"><span id="progressPct">0% tested</span><span id="progressLeft">— remaining</span></div>
+    </div>
+    <div class="sync-pill" id="syncPill"><span class="dot"></span><span id="syncLabel">Connecting…</span></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="search" id="searchBox" placeholder="Search test cases or IDs…" aria-label="Search test cases">
+    <select id="groupFilter" aria-label="Filter by functional area"><option value="">All functional areas</option></select>
+    <select id="statusFilter" aria-label="Filter by result">
+      <option value="">All results</option>
+      <option value="not-run">Not run</option>
+      <option value="pass">Pass</option>
+      <option value="fail">Fail</option>
+      <option value="partial">Partial Passed</option>
+    </select>
+    <a class="reset" id="resetFilters">Clear filters</a>
+    <span class="count" id="visibleCount"></span>
+  </div>
+
+  <div id="groupsRoot"></div>
+
+  <footer>
+    <span>Results are shared and saved automatically — no submit button needed.</span>
+    <span class="fmono" id="lastUpdated"></span>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── Supabase config ─────────────────────────────────────────────
+  var SUPABASE_URL = "https://tlxewqmznouxxmevwkxa.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRseGV3cW16bm91eHhtZXZ3a3hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTYxMjAsImV4cCI6MjEwNDQzMjEyMH0.gaebQbvW9-3czx4gZZurcJfxh_XLfOv2zzSQdmj-3KI";
+  var TABLE = "uat_results";
+
+  // ── Test case data ──────────────────────────────────────────────
+  // [group code, group name, [ [id, instructions, requiresTag?], ... ] ]
+  var GROUPS = [
+    ["AUTH", "Login & Account Security", [
+      ["AUTH-01", "Log in with a valid username and password. Confirm you land on the dashboard."],
+      ["AUTH-02", "Enter the wrong password for the same account 5 times in a row. Confirm the account locks with a clear “too many attempts” message and a cool-down time."],
+      ["AUTH-03", "Log in as the same user in two different browsers. Confirm the first browser is signed out, with an explanatory message, the next time you click anything there."],
+      ["AUTH-04", "From the Account page, change your own password. Log out and log back in with the new password."],
+      ["AUTH-05", "Log out. Confirm you land on the login screen and pressing Back does not reopen any protected page."]
+    ]],
+    ["USER", "Users, Roles & Permissions", [
+      ["USER-01", "Create a new user (e.g. a Cashier) with a username, password and role. Confirm they can log in."],
+      ["USER-02", "Edit an existing user and change their role from Cashier to Staff. Confirm their menu changes accordingly on next login."],
+      ["USER-03", "Deactivate a user and confirm they can no longer log in. Reactivate them and confirm they can again."],
+      ["USER-04", "Create a custom role named “Inventory Clerk” with only Products and Stock permissions. Assign it to a test user. Confirm they can reach Products/Stock but every other menu (Sales, Purchases, Customers, Finance) is hidden.", "Enterprise"],
+      ["USER-05", "Open the built-in Admin role, uncheck “Manage Users” and “Manage Roles”, and save. Confirm both stay checked — Admin should not be able to lock itself out.", "Enterprise"],
+      ["USER-06", "Try to delete a custom role that still has a user assigned to it. Confirm you get a clear message instead of it silently disappearing.", "Enterprise"]
+    ]],
+    ["PROD", "Categories & Products", [
+      ["PROD-01", "Create 3 product categories: “Cements”, “Roofing Sheets”, “Iron Rods”."],
+      ["PROD-02", "Create 3 products under “Cements” (e.g. Dangote Cement 50kg, GHACEM Cement 50kg, Diamond Cement 50kg), each with a cost price, selling price, unit and reorder level."],
+      ["PROD-03", "Create 2 products under “Roofing Sheets” sold by length (e.g. Aluzinc Sheet 3m, Aluzinc Sheet 4m)."],
+      ["PROD-04", "Edit one product’s selling price. Confirm the new price is what POS charges on the next sale."],
+      ["PROD-05", "Deactivate a product. Confirm it no longer appears in POS search, but still shows correctly on old receipts and reports."],
+      ["PROD-06", "Filter the product list by category (“Cements”) and confirm only that category’s products show."]
+    ]],
+    ["SUPP", "Suppliers", [
+      ["SUPP-01", "Create a supplier with a name, contact person and phone number."],
+      ["SUPP-02", "Edit that supplier’s contact details."],
+      ["SUPP-03", "Open the supplier’s page and confirm their purchase history and outstanding balance are correct."]
+    ]],
+    ["PUR", "Purchasing", [
+      ["PUR-01", "Create a purchase from a supplier for several Cements products, paid in full. Confirm stock increases by the quantities purchased."],
+      ["PUR-02", "Create a purchase on credit (nothing paid). Confirm it shows as “Unpaid” and the supplier’s payable balance increases by the full amount."],
+      ["PUR-03", "Make a partial payment against that unpaid purchase. Confirm its status changes to “Partial” and the payable balance drops by the amount paid."],
+      ["PUR-04", "Edit a purchase to change one item’s quantity. Confirm stock and the average cost recalculate correctly."],
+      ["PUR-05", "Void a purchase. Confirm the stock it added is removed and it no longer counts toward the supplier’s balance."]
+    ]],
+    ["CUST", "Customers", [
+      ["CUST-01", "Create a customer with a name, phone number and a credit limit."],
+      ["CUST-02", "Record a GHS 500 deposit for that customer. Confirm their balance shows GHS 500 in credit."],
+      ["CUST-03", "Open the customer’s transaction history and confirm the deposit appears with the right date and amount."],
+      ["CUST-04", "Edit the customer’s phone number and credit limit."]
+    ]],
+    ["SALE", "Sales & Point of Sale", [
+      ["SALE-01", "Complete a walk-in cash sale mixing Cements and Roofing Sheets products. Confirm the receipt totals are correct and stock drops accordingly."],
+      ["SALE-02", "Complete a sale for a registered customer on credit, within their credit limit. Confirm their balance goes further negative (owing) by the sale total."],
+      ["SALE-03", "Attempt a credit sale that would exceed the customer’s credit limit. Confirm it is blocked with a clear message."],
+      ["SALE-04", "Complete a sale for a customer using their deposit balance (from CUST-02). Confirm the balance is drawn down and no cash/mobile money account is affected."],
+      ["SALE-05", "Sell a decimal quantity of a weight-based product (e.g. 2.75kg). Confirm the receipt and stock both show the exact decimal, not rounded to a whole number."],
+      ["SALE-06", "Apply a discount to a sale and confirm the total reflects it correctly."],
+      ["SALE-07", "Void a completed sale. Confirm stock returns, and any customer balance or deposit used on that sale is reversed."],
+      ["SALE-08", "Print or view the receipt for a completed sale and confirm every line item, total and payment method is correct."]
+    ]],
+    ["STOCK", "Inventory Management", [
+      ["STOCK-01", "Perform a Stock-In outside of a purchase (e.g. a correction) and confirm the quantity increases with a reason recorded."],
+      ["STOCK-02", "Perform a Stock-Out (e.g. damaged goods) and confirm the quantity decreases with a reason recorded."],
+      ["STOCK-03", "Perform a Stock Adjustment to set a product’s count after a physical count. Confirm the movement log shows the before/after values."],
+      ["STOCK-04", "Open Low Stock Alerts and confirm every product below its reorder level is listed, and none above it are."],
+      ["STOCK-05", "Open a single product’s stock movement history and confirm every purchase, sale, adjustment and void affecting it is listed in order."]
+    ]],
+    ["FIN", "Financial Accounts", [
+      ["FIN-01", "Open Financial Accounts and confirm each account’s current balance and recent transactions display correctly."],
+      ["FIN-02", "Transfer funds from one account to another (e.g. Cash to Bank) with a small transfer charge. Confirm both balances update and the charge is recorded."],
+      ["FIN-03", "Create a new Mobile Money account. Confirm it appears in the account list and is selectable at POS.", "Growth+"],
+      ["FIN-04", "Edit an account’s provider and account number. Confirm the account type and running balance cannot be changed from this screen."],
+      ["FIN-05", "Try to deactivate the only remaining active account. Confirm it is blocked with a clear message."],
+      ["FIN-06", "Filter one account’s ledger by date range and type, then export it to CSV. Confirm the exported rows exactly match what is filtered on screen."]
+    ]],
+    ["EXP", "Expenses", [
+      ["EXP-01", "Record a business expense (e.g. fuel, rent) against a financial account. Confirm the account balance drops by that amount.", "Growth+"],
+      ["EXP-02", "Open the expenses list and confirm the new expense shows with the right date, category and amount.", "Growth+"]
+    ]],
+    ["BRANCH", "Multi-Branch", [
+      ["BRANCH-01", "Create a second branch (e.g. “Kasoa Branch”).", "Enterprise"],
+      ["BRANCH-02", "Assign an existing staff member to both branches, with the new branch as primary. Confirm on their next login the branch switcher shows both.", "Enterprise"],
+      ["BRANCH-03", "As that user, complete a sale. Confirm it is recorded against their active branch, not the other one.", "Enterprise"],
+      ["BRANCH-04", "Switch active branch using the header switcher and complete another sale. Confirm it lands on the newly selected branch.", "Enterprise"],
+      ["BRANCH-05", "Set a user to “Branch-scoped”, assigned only to Branch 1. Confirm they only see Branch 1’s sales/purchases, and opening a Branch 2 record by its link shows “not found.”", "Enterprise"],
+      ["BRANCH-06", "Set that same user to “Company-wide”. Confirm they now see both branches’ activity.", "Enterprise"],
+      ["BRANCH-07", "Try to deactivate the only remaining active branch. Confirm it is blocked with a clear message.", "Enterprise"]
+    ]],
+    ["XFER", "Inter-Branch Stock Transfers", [
+      ["XFER-01", "Dispatch a transfer of several Cements products from Branch 1 to Branch 2. Confirm Branch 1’s stock drops immediately.", "Enterprise"],
+      ["XFER-02", "Before it is received, confirm Branch 2’s stock is still unaffected and the transfer shows “In Transit.”", "Enterprise"],
+      ["XFER-03", "Receive the transfer in full at Branch 2. Confirm Branch 2’s stock increases and the transfer shows “Completed.”", "Enterprise"],
+      ["XFER-04", "Dispatch and receive a second transfer, entering a lower received quantity than sent (simulating breakage). Confirm only the received amount lands at Branch 2 and the shortfall is shown.", "Enterprise"],
+      ["XFER-05", "Dispatch a third transfer, then cancel it before receiving. Confirm the stock returns in full to Branch 1.", "Enterprise"]
+    ]],
+    ["CREDIT", "Customer Credit Settlement", [
+      ["CREDIT-01", "Have a customer deposit money at Branch 1, then spend part of it on a sale at Branch 2 using their deposit balance.", "Enterprise"],
+      ["CREDIT-02", "Open the Customer Credit Settlement report for that period. Confirm Branch 1 shows a positive net position and Branch 2 a negative one, matching the amounts.", "Enterprise"],
+      ["CREDIT-03", "Use the “Record Settlement” link from the report to record a transfer between the two branches’ accounts for the owed amount.", "Enterprise"]
+    ]],
+    ["RPT", "Reports", [
+      ["RPT-01", "Run the Sales Report for a date range and confirm the totals match what was actually sold in that period."],
+      ["RPT-02", "Run the Stock Valuation Report and confirm the total value matches quantity × cost across all products."],
+      ["RPT-03", "Run the Top Selling Products report and confirm the ranking matches actual sales volumes."],
+      ["RPT-04", "Run the Low Stock report and confirm it matches the Low Stock Alerts on the dashboard."],
+      ["RPT-05", "Run the Receivables report and confirm the amount owed and aging (0–30 / 31–60 / 61–90 / 90+ days) look correct for a customer with an overdue balance."],
+      ["RPT-06", "Run the Payables report and confirm the amount owed to a supplier with an unpaid purchase is correct."],
+      ["RPT-07", "Run the Profit & Loss statement for the current month and sanity-check revenue, cost of goods and expenses."],
+      ["RPT-08", "Run the Dead Stock report and confirm it lists products with no sales in the configured period."],
+      ["RPT-09", "Run the Profit Margin report and confirm margins look correct for a few known products."]
+    ]],
+    ["IMPEXP", "Import & Export", [
+      ["IMPEXP-01", "Export the Customers list to CSV and confirm every customer and balance appears correctly."],
+      ["IMPEXP-02", "Export a report (e.g. Sales Report) to CSV and confirm the totals match the on-screen totals exactly."],
+      ["IMPEXP-03", "Import a small CSV of new products (name, category, cost, price, opening stock) and confirm they appear correctly afterward."],
+      ["IMPEXP-04", "Import a purchase via CSV and confirm stock and the supplier balance update the same way a manually entered purchase would."]
+    ]],
+    ["AUDIT", "Audit Trail", [
+      ["AUDIT-01", "Void a sale and a purchase, then open the Audit Log. Confirm both actions are listed with the right user, date and details."],
+      ["AUDIT-02", "Filter the audit log by a specific user and date range. Confirm only matching entries show."],
+      ["AUDIT-03", "Edit a custom role’s permissions (add one, remove one). Confirm the audit entry shows exactly which permission was added and removed."],
+      ["AUDIT-04", "Export the audit log to CSV and confirm the row count matches what is shown on screen."]
+    ]],
+    ["SET", "Settings", [
+      ["SET-01", "Change the “Default POS Customer” setting to Walk-in and confirm POS pre-selects Walk-in on the next sale."],
+      ["SET-02", "Change the sale discount type between Percentage and Flat and confirm the POS discount field behaves accordingly."],
+      ["SET-03", "Open Settings and confirm the current plan (Core / Growth / Enterprise) and its included features display correctly."]
+    ]]
+  ];
+
+  var STATUS_LABEL = { "not-run": "Not run", "pass": "Pass", "fail": "Fail", "partial": "Partial Passed" };
+  var STATUS_CLASS = { "not-run": "", "pass": "st-pass", "fail": "st-fail", "partial": "st-partial" };
+
+  // ── State ───────────────────────────────────────────────────────
+  var results = {};        // id -> { status, remarks }
+  var rowRefs = {};         // id -> { tr, select, input, groupCode }
+  var LS_KEY = "ibs_uat_matrix_v1";
+  var supabase = null;
+  var totalCases = 0;
+
+  GROUPS.forEach(function (g) { totalCases += g[2].length; });
+  document.getElementById("metaCases").textContent = totalCases;
+  document.getElementById("metaGroups").textContent = GROUPS.length;
+
+  // ── Build DOM ───────────────────────────────────────────────────
+  var root = document.getElementById("groupsRoot");
+  var groupFilter = document.getElementById("groupFilter");
+
+  GROUPS.forEach(function (g, gi) {
+    var code = g[0], name = g[1], cases = g[2];
+
+    var opt = document.createElement("option");
+    opt.value = code; opt.textContent = name;
+    groupFilter.appendChild(opt);
+
+    var section = document.createElement("section");
+    section.className = "group";
+    section.dataset.group = code;
+
+    var head = document.createElement("div");
+    head.className = "group-head";
+    head.innerHTML =
+      '<span class="idx">' + String(gi + 1).padStart(2, "0") + '</span>' +
+      '<h2>' + name + '</h2>' +
+      '<span class="gcount" data-gcount="' + code + '">0/' + cases.length + '</span>';
+    section.appendChild(head);
+
+    var scroll = document.createElement("div");
+    scroll.className = "table-scroll";
+    var table = document.createElement("table");
+    table.innerHTML =
+      '<thead><tr><th style="width:100px">Test ID</th><th>Test Case</th><th style="width:150px">Result</th><th style="width:220px">Remarks</th></tr></thead>';
+    var tbody = document.createElement("tbody");
+
+    cases.forEach(function (c) {
+      var id = c[0], text = c[1], tag = c[2];
+      var tr = document.createElement("tr");
+      tr.dataset.id = id;
+      tr.dataset.group = code;
+      tr.dataset.search = (id + " " + text).toLowerCase();
+
+      var tdId = document.createElement("td");
+      tdId.className = "id-cell";
+      tdId.textContent = id;
+
+      var tdText = document.createElement("td");
+      tdText.className = "text-cell";
+      tdText.textContent = text;
+      if (tag) {
+        var reqSpan = document.createElement("span");
+        reqSpan.className = "req";
+        reqSpan.textContent = tag;
+        tdText.appendChild(reqSpan);
+      }
+
+      var tdResult = document.createElement("td");
+      tdResult.className = "result-cell";
+      var select = document.createElement("select");
+      select.className = "status-select";
+      ["not-run", "pass", "fail", "partial"].forEach(function (key) {
+        var o = document.createElement("option");
+        o.value = key; o.textContent = STATUS_LABEL[key];
+        select.appendChild(o);
+      });
+      tdResult.appendChild(select);
+
+      var tdRemarks = document.createElement("td");
+      tdRemarks.className = "remarks-cell";
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "remarks-input";
+      input.placeholder = "Add a note…";
+      tdRemarks.appendChild(input);
+
+      tr.appendChild(tdId); tr.appendChild(tdText); tr.appendChild(tdResult); tr.appendChild(tdRemarks);
+      tbody.appendChild(tr);
+
+      rowRefs[id] = { tr: tr, select: select, input: input, groupCode: code };
+
+      select.addEventListener("change", function () { saveResult(id); });
+      input.addEventListener("blur", function () { saveResult(id); });
+      input.addEventListener("keydown", function (e) { if (e.key === "Enter") input.blur(); });
+    });
+
+    table.appendChild(tbody);
+    scroll.appendChild(table);
+    section.appendChild(scroll);
+    root.appendChild(section);
+  });
+
+  // ── Persistence: Supabase with localStorage fallback ─────────────
+  function applyResult(id, data) {
+    results[id] = data;
+    var refs = rowRefs[id];
+    if (!refs) return;
+    var status = data.status || "not-run";
+    refs.select.value = status;
+    refs.select.className = "status-select " + (STATUS_CLASS[status] || "");
+    if (document.activeElement !== refs.input) {
+      refs.input.value = data.remarks || "";
+    }
+  }
+
+  function recomputeAll() {
+    var counts = { total: totalCases, pass: 0, fail: 0, partial: 0, notrun: 0 };
+    var groupCounts = {};
+    GROUPS.forEach(function (g) { groupCounts[g[0]] = { done: 0, total: g[2].length }; });
+
+    Object.keys(rowRefs).forEach(function (id) {
+      var r = results[id];
+      var status = (r && r.status) || "not-run";
+      var gc = rowRefs[id].groupCode;
+      if (status === "pass") { counts.pass++; groupCounts[gc].done++; }
+      else if (status === "fail") { counts.fail++; groupCounts[gc].done++; }
+      else if (status === "partial") { counts.partial++; groupCounts[gc].done++; }
+      else { counts.notrun++; }
+    });
+
+    document.getElementById("statTotal").textContent = counts.total;
+    document.getElementById("statPass").textContent = counts.pass;
+    document.getElementById("statFail").textContent = counts.fail;
+    document.getElementById("statPartial").textContent = counts.partial;
+    document.getElementById("statNotRun").textContent = counts.notrun;
+
+    var tested = counts.pass + counts.fail + counts.partial;
+    var pct = counts.total ? Math.round((tested / counts.total) * 100) : 0;
+    document.getElementById("segPass").style.width = (counts.total ? (counts.pass / counts.total * 100) : 0) + "%";
+    document.getElementById("segPartial").style.width = (counts.total ? (counts.partial / counts.total * 100) : 0) + "%";
+    document.getElementById("segFail").style.width = (counts.total ? (counts.fail / counts.total * 100) : 0) + "%";
+    document.getElementById("progressPct").textContent = pct + "% tested";
+    document.getElementById("progressLeft").textContent = counts.notrun + " remaining";
+
+    Object.keys(groupCounts).forEach(function (code) {
+      var el = document.querySelector('[data-gcount="' + code + '"]');
+      if (el) el.textContent = groupCounts[code].done + "/" + groupCounts[code].total;
+    });
+
+    document.getElementById("lastUpdated").textContent = "Updated " + new Date().toLocaleString();
+  }
+
+  function loadLocal() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      var data = raw ? JSON.parse(raw) : {};
+      Object.keys(data).forEach(function (id) { applyResult(id, data[id]); });
+    } catch (e) { /* ignore */ }
+    recomputeAll();
+  }
+
+  function saveLocal(id, data) {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      var all = raw ? JSON.parse(raw) : {};
+      all[id] = data;
+      localStorage.setItem(LS_KEY, JSON.stringify(all));
+    } catch (e) { /* ignore */ }
+  }
+
+  function saveResult(id) {
+    var refs = rowRefs[id];
+    if (!refs) return;
+    var data = { status: refs.select.value, remarks: refs.input.value, updated_at: new Date().toISOString() };
+    results[id] = data;
+    recomputeAll();
+
+    refs.input.classList.add("saved-flash");
+    setTimeout(function () { refs.input.classList.remove("saved-flash"); }, 900);
+
+    if (supabase) {
+      supabase.from(TABLE).upsert({ test_id: id, status: data.status, remarks: data.remarks, updated_at: data.updated_at })
+        .then(function (res) {
+          if (res.error) saveLocal(id, data);
+        })
+        .catch(function () { saveLocal(id, data); });
+    } else {
+      saveLocal(id, data);
+    }
+  }
+
+  function setSyncPill(mode) {
+    var pill = document.getElementById("syncPill");
+    var label = document.getElementById("syncLabel");
+    pill.className = "sync-pill " + mode;
+    var text = { live: "Live — synced to everyone", local: "Offline — saved on this device only", error: "Sync error — saved on this device only", connecting: "Connecting…" };
+    label.textContent = text[mode] || text.connecting;
+  }
+
+  function initSupabase() {
+    if (typeof window.supabase === "undefined" || !window.supabase.createClient) {
+      setSyncPill("local"); loadLocal(); return;
+    }
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+      setSyncPill("local"); loadLocal(); return;
+    }
+
+    supabase.from(TABLE).select("*").then(function (res) {
+      if (res.error) {
+        setSyncPill("error"); loadLocal(); return;
+      }
+      (res.data || []).forEach(function (row) {
+        applyResult(row.test_id, { status: row.status, remarks: row.remarks, updated_at: row.updated_at });
+      });
+      recomputeAll();
+      setSyncPill("live");
+
+      supabase
+        .channel("uat_results_changes")
+        .on("postgres_changes", { event: "*", schema: "public", table: TABLE }, function (payload) {
+          if (payload.eventType === "DELETE") return;
+          var row = payload.new;
+          applyResult(row.test_id, { status: row.status, remarks: row.remarks, updated_at: row.updated_at });
+          recomputeAll();
+        })
+        .subscribe(function (status) {
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setSyncPill("error");
+        });
+    }).catch(function () {
+      setSyncPill("error"); loadLocal();
+    });
+  }
+
+  // ── Filtering ─────────────────────────────────────────────────
+  var searchBox = document.getElementById("searchBox");
+  var statusFilter = document.getElementById("statusFilter");
+
+  function applyFilters() {
+    var q = searchBox.value.trim().toLowerCase();
+    var gFilter = groupFilter.value;
+    var sFilter = statusFilter.value;
+    var visible = 0;
+
+    document.querySelectorAll(".group").forEach(function (section) {
+      var code = section.dataset.group;
+      var groupHasVisible = false;
+      if (gFilter && gFilter !== code) { section.classList.add("hidden-row"); return; }
+      section.classList.remove("hidden-row");
+
+      section.querySelectorAll("tbody tr").forEach(function (tr) {
+        var id = tr.dataset.id;
+        var status = (results[id] && results[id].status) || "not-run";
+        var matchesText = !q || tr.dataset.search.indexOf(q) !== -1;
+        var matchesStatus = !sFilter || sFilter === status;
+        var show = matchesText && matchesStatus;
+        tr.classList.toggle("hidden-row", !show);
+        if (show) { groupHasVisible = true; visible++; }
+      });
+      section.classList.toggle("hidden-row", !groupHasVisible);
+    });
+
+    document.getElementById("visibleCount").textContent = visible + " of " + totalCases + " shown";
+  }
+
+  searchBox.addEventListener("input", applyFilters);
+  groupFilter.addEventListener("change", applyFilters);
+  statusFilter.addEventListener("change", applyFilters);
+  document.getElementById("resetFilters").addEventListener("click", function () {
+    searchBox.value = ""; groupFilter.value = ""; statusFilter.value = "";
+    applyFilters();
+  });
+
+  recomputeAll();
+  applyFilters();
+  initSupabase();
+})();
+</script>
+</body>
+</html>
