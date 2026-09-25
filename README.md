@@ -1,11 +1,12 @@
 # IBS UAT Tracker
 
-An 85-case end-to-end User Acceptance Test script for the IBS Business
-Management System, grouped by functional area (Login, Users & Roles,
-Categories & Products, Suppliers, Purchasing, Customers, Sales/POS,
-Inventory, Financial Accounts, Expenses, Multi-Branch, Stock Transfers,
-Customer Credit Settlement, Reports, Import/Export, Audit Trail,
-Settings).
+A 147-case end-to-end User Acceptance Test script for the IBS Business
+Management System, grouped by functional area (Login & Subscription,
+Users & Roles, Categories & Products, Suppliers, Purchasing, Customers,
+Sales/POS, Direct Delivery, Inventory, Batch & Expiry Tracking,
+Financial Accounts, Suspense Account, Expenses, Multi-Branch, Stock
+Transfers, Customer Credit Settlement, Reports, Import/Export, Audit
+Trail, Settings).
 
 It's a single static page (`index.html`) backed by a
 [Supabase](https://supabase.com) Postgres table for shared, live-synced
@@ -44,3 +45,9 @@ The test cases themselves live in the `GROUPS` array near the top of
 `index.html`'s script — each entry is `[id, instruction text, optional
 plan tag]` grouped under a `[code, name, cases]` section. Add, edit or
 reorder cases there directly; no build step, just edit and push.
+
+Results are stored against the test ID, so never renumber or reuse an
+existing ID — a recorded result would silently attach to a different
+case. Add new cases with the next free number in their group instead,
+and when an existing case's steps change enough to invalidate its
+result, reset that result to "Not run" on the page.

@@ -236,7 +236,10 @@
       ["AUTH-02", "Enter the wrong password for the same account 5 times in a row. Confirm the account locks with a clear “too many attempts” message and a cool-down time."],
       ["AUTH-03", "Log in as the same user in two different browsers. Confirm the first browser is signed out, with an explanatory message, the next time you click anything there."],
       ["AUTH-04", "From the Account page, change your own password. Log out and log back in with the new password."],
-      ["AUTH-05", "Log out. Confirm you land on the login screen and pressing Back does not reopen any protected page."]
+      ["AUTH-05", "Log out. Confirm you land on the login screen and pressing Back does not reopen any protected page."],
+      ["AUTH-06", "Open the Subscription page. Confirm it shows the subscription status, expiry date and this installation’s ID (quoted when requesting a renewal code)."],
+      ["AUTH-07", "Enter a made-up or mistyped unlock code. Confirm it is refused with a clear message and the expiry date does not change."],
+      ["AUTH-08", "Enter a valid unlock code issued for this installation’s ID (request one from the vendor). Confirm the new expiry date shows and any renewal banner disappears."]
     ]],
     ["USER", "Users, Roles & Permissions", [
       ["USER-01", "Create a new user (e.g. a Cashier) with a username, password and role. Confirm they can log in."],
@@ -244,7 +247,8 @@
       ["USER-03", "Deactivate a user and confirm they can no longer log in. Reactivate them and confirm they can again."],
       ["USER-04", "Create a custom role named “Inventory Clerk” with only Products and Stock permissions. Assign it to a test user. Confirm they can reach Products/Stock but every other menu (Sales, Purchases, Customers, Finance) is hidden.", "Enterprise"],
       ["USER-05", "Open the built-in Admin role, uncheck “Manage Users” and “Manage Roles”, and save. Confirm both stay checked — Admin should not be able to lock itself out.", "Enterprise"],
-      ["USER-06", "Try to delete a custom role that still has a user assigned to it. Confirm you get a clear message instead of it silently disappearing.", "Enterprise"]
+      ["USER-06", "Try to delete a custom role that still has a user assigned to it. Confirm you get a clear message instead of it silently disappearing.", "Enterprise"],
+      ["USER-07", "Log in as a branch-level admin and open Users. Confirm company-wide admins are not listed, and opening one by its link to edit, deactivate or reset their password is refused.", "Enterprise"]
     ]],
     ["PROD", "Categories & Products", [
       ["PROD-01", "Create 3 product categories: “Cements”, “Roofing Sheets”, “Iron Rods”."],
@@ -252,7 +256,8 @@
       ["PROD-03", "Create 2 products under “Roofing Sheets” sold by length (e.g. Aluzinc Sheet 3m, Aluzinc Sheet 4m)."],
       ["PROD-04", "Edit one product’s selling price. Confirm the new price is what POS charges on the next sale."],
       ["PROD-05", "Deactivate a product. Confirm it no longer appears in POS search, but still shows correctly on old receipts and reports."],
-      ["PROD-06", "Filter the product list by category (“Cements”) and confirm only that category’s products show."]
+      ["PROD-06", "Filter the product list by category (“Cements”) and confirm only that category’s products show."],
+      ["PROD-07", "Filter the product list to Inactive, reactivate the product deactivated in PROD-05, and confirm it is back in POS search."]
     ]],
     ["SUPP", "Suppliers", [
       ["SUPP-01", "Create a supplier with a name, contact person and phone number."],
@@ -264,7 +269,9 @@
       ["PUR-02", "Create a purchase on credit (nothing paid). Confirm it shows as “Unpaid” and the supplier’s payable balance increases by the full amount."],
       ["PUR-03", "Make a partial payment against that unpaid purchase. Confirm its status changes to “Partial” and the payable balance drops by the amount paid."],
       ["PUR-04", "Edit a purchase to change one item’s quantity. Confirm stock and the average cost recalculate correctly."],
-      ["PUR-05", "Void a purchase. Confirm the stock it added is removed and it no longer counts toward the supplier’s balance."]
+      ["PUR-05", "Void a purchase. Confirm the stock it added is removed and it no longer counts toward the supplier’s balance."],
+      ["PUR-06", "Buy a product, sell most of it, then try to void that purchase. Confirm it is blocked with a message that voiding would take the branch’s stock below zero."],
+      ["PUR-07", "Edit a purchase and lower an item’s quantity by more than is left in stock. Confirm the edit is refused with the current stock shown."]
     ]],
     ["CUST", "Customers", [
       ["CUST-01", "Create a customer with a name, phone number and a credit limit."],
@@ -280,14 +287,54 @@
       ["SALE-05", "Sell a decimal quantity of a weight-based product (e.g. 2.75kg). Confirm the receipt and stock both show the exact decimal, not rounded to a whole number."],
       ["SALE-06", "Apply a discount to a sale and confirm the total reflects it correctly."],
       ["SALE-07", "Void a completed sale. Confirm stock returns, and any customer balance or deposit used on that sale is reversed."],
-      ["SALE-08", "Print or view the receipt for a completed sale and confirm every line item, total and payment method is correct."]
+      ["SALE-08", "Print or view the receipt for a completed sale and confirm every line item, total and payment method is correct."],
+      ["SALE-09", "Open the sale voided in SALE-07. Confirm it shows VOIDED and has no Void button. Open its void link again directly and confirm it is refused as “already voided”, with stock and the customer’s balance unchanged."],
+      ["SALE-10", "Give a customer a GHS 500 deposit and a credit limit of 0. Try to sell them GHS 800 paying from deposit. Confirm it is blocked by the credit limit (they would owe 300)."],
+      ["SALE-11", "With Walk-in Customer selected at POS, confirm neither Credit nor From Deposit can be used. Edit a walk-in sale and confirm From Deposit is not offered there either."],
+      ["SALE-12", "Edit a completed cash sale to be paid by Mobile Money into a chosen account. Confirm the money moves: the cash account drops and the MoMo account rises by the sale amount."],
+      ["SALE-13", "On a credit sale, record a payment from the customer’s deposit for more than the deposit holds. Confirm a warning states how much was applied and how much is still owed."],
+      ["SALE-14", "Edit a credit sale and try to raise the amount paid. Confirm you are sent to Record Payment (which asks how the customer paid) instead."]
+    ]],
+    ["DIST", "Direct Delivery (Distributor)", [
+      ["DIST-01", "Record a direct delivery (supplier delivers straight to a customer). Confirm both a purchase and a sale are created at your active branch, and stock is unchanged.", "Enterprise"],
+      ["DIST-02", "Record a direct delivery for a customer holding a deposit, paying from deposit for more than it holds. Confirm the deposit is used up, the rest is left owing, and Credit is not offered.", "Enterprise"],
+      ["DIST-03", "Try a direct delivery on credit that exceeds the customer’s credit limit, and one on credit for Walk-in Customer. Confirm both are refused.", "Enterprise"],
+      ["DIST-04", "Check the Profit & Loss for a direct delivery. Confirm its cost of goods is the delivery’s own purchase cost, not the product’s average cost.", "Enterprise"]
     ]],
     ["STOCK", "Inventory Management", [
       ["STOCK-01", "Perform a Stock-In outside of a purchase (e.g. a correction) and confirm the quantity increases with a reason recorded."],
       ["STOCK-02", "Perform a Stock-Out (e.g. damaged goods) and confirm the quantity decreases with a reason recorded."],
       ["STOCK-03", "Perform a Stock Adjustment to set a product’s count after a physical count. Confirm the movement log shows the before/after values."],
       ["STOCK-04", "Open Low Stock Alerts and confirm every product below its reorder level is listed, and none above it are."],
-      ["STOCK-05", "Open a single product’s stock movement history and confirm every purchase, sale, adjustment and void affecting it is listed in order."]
+      ["STOCK-05", "Open a single product’s stock movement history and confirm every purchase, sale, adjustment and void affecting it is listed in order."],
+      ["STOCK-06", "Switch to Branch 2 and open a product’s page. Confirm its stock, stock movements and recent sales are Branch 2’s only.", "Enterprise"]
+    ]],
+    ["BATCH", "Batch & Expiry Tracking", [
+      ["BATCH-01", "With “Track batches and expiry dates” off in Settings, confirm products have no batch fields and Reports has no Expiry Report. Switch it on and confirm both appear."],
+      ["BATCH-02", "Edit a product that has stock and tick “Track batches and expiry dates”. Open its page: the Batches table shows the current stock as one batch of unknown expiry, marked “Sold first”."],
+      ["BATCH-03", "Create a new tracked product with opening stock. Confirm an expiry date is required for the opening stock and the product page shows that batch."],
+      ["BATCH-04", "Start a purchase with a tracked product. Confirm it can’t be saved without an expiry date, or with an expiry date before the purchase date."],
+      ["BATCH-05", "Purchase one tracked product in two batches using “+ batch” (different batch numbers, expiry dates and costs). Confirm both batches show on the product page and purchase view, and the average cost weighs both lines."],
+      ["BATCH-06", "Do a Stock In of a tracked product. Confirm it asks for the batch and expiry, and the new batch shows on the product page and in its stock history."],
+      ["BATCH-07", "Sell part of a purchased batch, then edit that purchase to correct the batch’s expiry date. Confirm only the unsold stock is relabelled and total stock is unchanged."],
+      ["BATCH-08", "Void a purchase whose batch has been partly sold. Confirm what’s left of that batch is removed and the rest comes off the earliest-expiring other stock; the batches still add up to the stock figure."],
+      ["BATCH-09", "With two batches of a product, sell more than the earliest-expiring batch holds. Confirm the sale view shows that batch used up first, then part of the next."],
+      ["BATCH-10", "Create an expired batch: record a back-dated purchase (purchase date two months ago) with an expiry date one month ago. At POS confirm the product shows “N expired”, you can’t sell more than its in-date stock, and a product whose stock is all expired can’t be added."],
+      ["BATCH-11", "Set Settings → Selling expired stock to “Allow, with a warning”. Sell more than the in-date stock. Confirm the cart flags “Includes expired stock”, the sale completes, and in-date batches were used first."],
+      ["BATCH-12", "Void a sale of a tracked product. Confirm the stock goes back into the same batches it came from (product page)."],
+      ["BATCH-13", "Stock Out a tracked product choosing its expired batch, reason “Expired”. Confirm that batch empties and the stock history names it. Try removing more than a batch holds and confirm it is refused."],
+      ["BATCH-14", "Do a stock adjustment (physical count) on a tracked product, once lower and once higher. Confirm a shortfall comes off the earliest-expiring batch and a surplus is added with unknown expiry."],
+      ["BATCH-15", "Transfer a tracked product to Branch 2. Confirm the transfer shows which batches were sent, and after receipt Branch 2’s product page shows the same batch numbers and expiry dates.", "Enterprise"],
+      ["BATCH-16", "Receive a transfer of a tracked product with a shortfall. Confirm the missing quantity comes off the latest-expiring batch.", "Enterprise"],
+      ["BATCH-17", "Cancel an in-transit transfer of a tracked product. Confirm the stock returns to the same batches at Branch 1.", "Enterprise"],
+      ["BATCH-18", "Open Reports → Expiry Report. Confirm the Expired, Expiring soon and Unknown expiry cards and values match the batches, and the status and category filters work."],
+      ["BATCH-19", "Export the Expiry Report to CSV. Confirm the rows and total value match the screen for the same filter.", "Growth+"],
+      ["BATCH-20", "Confirm the dashboard alerts show the expired and expiring-soon batch counts and link to the Expiry Report."],
+      ["BATCH-21", "Confirm the product list shows each tracked product’s nearest expiry under its stock — red once expired, amber when expiring soon."],
+      ["BATCH-22", "Change the expiring-soon warning to 30 days. Confirm a batch expiring in 45 days no longer counts as expiring soon (report, dashboard, product list)."],
+      ["BATCH-23", "Import products with track_expiry, batch_number and expiry_date columns, and a purchase CSV with one product on two rows (two batches). Confirm the batches land correctly, and a batch given for an untracked product is rejected in the preview.", "Growth+"],
+      ["BATCH-24", "With tracking on, buy and sell a product that isn’t tracked. Confirm no batch fields appear and it behaves exactly as before."],
+      ["BATCH-25", "Switch tracking off in Settings. Confirm batch fields, the Expiry Report and expiry alerts disappear and sales still work. Switch it back on and confirm the batches are still correct."]
     ]],
     ["FIN", "Financial Accounts", [
       ["FIN-01", "Open Financial Accounts and confirm each account’s current balance and recent transactions display correctly."],
@@ -295,7 +342,14 @@
       ["FIN-03", "Create a new Mobile Money account. Confirm it appears in the account list and is selectable at POS.", "Growth+"],
       ["FIN-04", "Edit an account’s provider and account number. Confirm the account type and running balance cannot be changed from this screen."],
       ["FIN-05", "Try to deactivate the only remaining active account. Confirm it is blocked with a clear message."],
-      ["FIN-06", "Filter one account’s ledger by date range and type, then export it to CSV. Confirm the exported rows exactly match what is filtered on screen."]
+      ["FIN-06", "Filter one account’s ledger by date range and type, then export it to CSV. Confirm the exported rows exactly match what is filtered on screen."],
+      ["FIN-07", "As a branch-level admin, try to create an account with no branch selected. Confirm it is refused: only a company-wide admin can create a company-wide account.", "Enterprise"],
+      ["FIN-08", "Confirm the Suspense account is never offered as a payment account at POS, on purchases or on customer deposits.", "Growth+"]
+    ]],
+    ["SUSP", "Suspense Account", [
+      ["SUSP-01", "Record an unidentified payment (money received in a Bank or MoMo account from an unknown sender) in Suspense. Confirm it shows as pending and the unresolved balance rises.", "Growth+"],
+      ["SUSP-02", "Resolve it to a registered customer. Confirm it moves to Resolved and the customer’s deposit balance rises by that amount. Confirm Walk-in Customer can’t be chosen.", "Growth+"],
+      ["SUSP-03", "Edit a pending suspense entry’s amount or account, then delete another. Confirm the unresolved balance updates each time.", "Growth+"]
     ]],
     ["EXP", "Expenses", [
       ["EXP-01", "Record a business expense (e.g. fuel, rent) against a financial account. Confirm the account balance drops by that amount.", "Growth+"],
@@ -303,24 +357,29 @@
     ]],
     ["BRANCH", "Multi-Branch", [
       ["BRANCH-01", "Create a second branch (e.g. “Kasoa Branch”).", "Enterprise"],
-      ["BRANCH-02", "Assign an existing staff member to both branches, with the new branch as primary. Confirm on their next login the branch switcher shows both.", "Enterprise"],
+      ["BRANCH-02", "Edit an existing staff member and move them to the new branch. Confirm the user form lets you pick only one branch (every user belongs to exactly one), and on their next login they work at the new branch.", "Enterprise"],
       ["BRANCH-03", "As that user, complete a sale. Confirm it is recorded against their active branch, not the other one.", "Enterprise"],
-      ["BRANCH-04", "Switch active branch using the header switcher and complete another sale. Confirm it lands on the newly selected branch.", "Enterprise"],
+      ["BRANCH-04", "As a company-wide admin, switch the active branch using the header switcher and complete a sale. Confirm it lands on the newly selected branch. (Branch staff see no switcher — they always work at their own branch.)", "Enterprise"],
       ["BRANCH-05", "Set a user to “Branch-scoped”, assigned only to Branch 1. Confirm they only see Branch 1’s sales/purchases, and opening a Branch 2 record by its link shows “not found.”", "Enterprise"],
-      ["BRANCH-06", "Set that same user to “Company-wide”. Confirm they now see both branches’ activity.", "Enterprise"],
-      ["BRANCH-07", "Try to deactivate the only remaining active branch. Confirm it is blocked with a clear message.", "Enterprise"]
+      ["BRANCH-06", "Set that same user to “Company-wide”. Confirm they can now switch the header to either branch, and to “All branches” to see both branches’ activity combined.", "Enterprise"],
+      ["BRANCH-07", "Try to deactivate the only remaining active branch. Confirm it is blocked with a clear message.", "Enterprise"],
+      ["BRANCH-08", "As a company-wide admin, pick “All branches” in the header. Confirm lists, reports and the dashboard combine every branch, while a new sale still records at the active branch the header names.", "Enterprise"]
     ]],
     ["XFER", "Inter-Branch Stock Transfers", [
       ["XFER-01", "Dispatch a transfer of several Cements products from Branch 1 to Branch 2. Confirm Branch 1’s stock drops immediately.", "Enterprise"],
       ["XFER-02", "Before it is received, confirm Branch 2’s stock is still unaffected and the transfer shows “In Transit.”", "Enterprise"],
-      ["XFER-03", "Receive the transfer in full at Branch 2. Confirm Branch 2’s stock increases and the transfer shows “Completed.”", "Enterprise"],
-      ["XFER-04", "Dispatch and receive a second transfer, entering a lower received quantity than sent (simulating breakage). Confirm only the received amount lands at Branch 2 and the shortfall is shown.", "Enterprise"],
-      ["XFER-05", "Dispatch a third transfer, then cancel it before receiving. Confirm the stock returns in full to Branch 1.", "Enterprise"]
+      ["XFER-03", "Log in as a Branch 2 user (not the person who dispatched it) and receive the transfer in full. Confirm Branch 2’s stock increases and the transfer shows “Completed.”", "Enterprise"],
+      ["XFER-04", "Dispatch a second transfer and, as a Branch 2 user, receive it entering a lower quantity than sent (simulating breakage). Confirm only the received amount lands at Branch 2 and the shortfall is shown.", "Enterprise"],
+      ["XFER-05", "Dispatch a third transfer, then cancel it before receiving. Confirm the stock returns in full to Branch 1.", "Enterprise"],
+      ["XFER-06", "Open an in-transit transfer as the user who dispatched it, then as a user not assigned to Branch 2. Confirm neither has a Receive button and opening the receive link directly is refused.", "Enterprise"]
     ]],
     ["CREDIT", "Customer Credit Settlement", [
       ["CREDIT-01", "Have a customer deposit money at Branch 1, then spend part of it on a sale at Branch 2 using their deposit balance.", "Enterprise"],
       ["CREDIT-02", "Open the Customer Credit Settlement report for that period. Confirm Branch 1 shows a positive net position and Branch 2 a negative one, matching the amounts.", "Enterprise"],
-      ["CREDIT-03", "Use the “Record Settlement” link from the report to record a transfer between the two branches’ accounts for the owed amount.", "Enterprise"]
+      ["CREDIT-03", "Use the “Record Settlement” link from the report to record a transfer between the two branches’ accounts for the owed amount.", "Enterprise"],
+      ["CREDIT-04", "On the Record Settlement form, confirm From lists only the paying branch’s accounts and To only the receiving branch’s (cash first) — no shared company-wide or suspense accounts.", "Enterprise"],
+      ["CREDIT-05", "After recording the settlement, reopen the report for the same period. Confirm the Suggested Settlement (who owes whom) shows it as settled and the net positions now balance.", "Enterprise"],
+      ["CREDIT-06", "Edit a customer deposit and change its account to one at the other branch. Confirm the settlement report now counts that deposit at the new branch.", "Enterprise"]
     ]],
     ["RPT", "Reports", [
       ["RPT-01", "Run the Sales Report for a date range and confirm the totals match what was actually sold in that period."],
@@ -331,24 +390,33 @@
       ["RPT-06", "Run the Payables report and confirm the amount owed to a supplier with an unpaid purchase is correct."],
       ["RPT-07", "Run the Profit & Loss statement for the current month and sanity-check revenue, cost of goods and expenses."],
       ["RPT-08", "Run the Dead Stock report and confirm it lists products with no sales in the configured period."],
-      ["RPT-09", "Run the Profit Margin report and confirm margins look correct for a few known products."]
+      ["RPT-09", "Run the Profit Margin report and confirm margins look correct for a few known products."],
+      ["RPT-10", "Note last month’s gross profit on the Profit & Loss. Buy more of a product sold last month at a very different cost. Confirm last month’s gross profit has not changed."],
+      ["RPT-11", "Run the Stock by Branch report. Confirm each branch column matches that branch’s stock, filter by branch and category, and export it.", "Enterprise"],
+      ["RPT-12", "As a company-wide admin, run the Branch Performance report for a period. Confirm each branch’s revenue, sales count and margin, and that branch-level users cannot open it.", "Enterprise"]
     ]],
     ["IMPEXP", "Import & Export", [
       ["IMPEXP-01", "Export the Customers list to CSV and confirm every customer and balance appears correctly."],
       ["IMPEXP-02", "Export a report (e.g. Sales Report) to CSV and confirm the totals match the on-screen totals exactly."],
-      ["IMPEXP-03", "Import a small CSV of new products (name, category, cost, price, opening stock) and confirm they appear correctly afterward."],
-      ["IMPEXP-04", "Import a purchase via CSV and confirm stock and the supplier balance update the same way a manually entered purchase would."]
+      ["IMPEXP-03", "Import a small CSV of new products (SKU, name, category, supplier, selling price, cost, opening stock) and confirm they appear correctly afterward, with the opening stock at your active branch."],
+      ["IMPEXP-04", "Import a purchase via CSV and confirm stock and the supplier balance update the same way a manually entered purchase would."],
+      ["IMPEXP-05", "Download the categories, suppliers, products, customers and purchases templates and import them unchanged, in that order. Confirm every row imports without errors."],
+      ["IMPEXP-06", "Re-import products with “Update Existing”, leaving cost and stock cells blank for some rows. Confirm blank cells keep the existing values rather than zeroing them."],
+      ["IMPEXP-07", "Save a products file from Excel as “CSV UTF-8” and import it. Confirm the first column is recognised (no “missing column” error)."],
+      ["IMPEXP-08", "Export the sales history including a sale with a whole-cart discount. Confirm each line shows its share of the discount and the column adds up to the discount given."]
     ]],
     ["AUDIT", "Audit Trail", [
       ["AUDIT-01", "Void a sale and a purchase, then open the Audit Log. Confirm both actions are listed with the right user, date and details."],
       ["AUDIT-02", "Filter the audit log by a specific user and date range. Confirm only matching entries show."],
       ["AUDIT-03", "Edit a custom role’s permissions (add one, remove one). Confirm the audit entry shows exactly which permission was added and removed."],
-      ["AUDIT-04", "Export the audit log to CSV and confirm the row count matches what is shown on screen."]
+      ["AUDIT-04", "Export the audit log to CSV and confirm the row count matches what is shown on screen."],
+      ["AUDIT-05", "Cut a product’s selling price by 30% or more, and void a sale. As an admin with audit access, confirm the dashboard shows an amber security alert for each, which clears after opening the Audit Log."]
     ]],
     ["SET", "Settings", [
       ["SET-01", "Change the “Default POS Customer” setting to Walk-in and confirm POS pre-selects Walk-in on the next sale."],
       ["SET-02", "Change the sale discount type between Percentage and Flat and confirm the POS discount field behaves accordingly."],
-      ["SET-03", "Open Settings and confirm the current plan (Core / Growth / Enterprise) and its included features display correctly."]
+      ["SET-03", "Open Settings and confirm the current plan (Core / Growth / Enterprise) and its included features display correctly."],
+      ["SET-04", "Change the timezone in Settings. Confirm the time shown there, and the timestamp on a new sale, follow the new timezone."]
     ]]
   ];
 
